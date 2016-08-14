@@ -1,86 +1,84 @@
-'use strict';
+angular.module('Postblazer')
+    .directive('uiSwitch', ['$window', '$timeout', '$log', '$parse', function ($window, $timeout, $log, $parse) {
 
-/**
- * Module to use Switchery as a directive for angular.
- * @TODO implement Switchery as a service, https://github.com/abpetkov/switchery/pull/11
- */
-angular.module('NgSwitchery', [])
-    .directive('uiSwitch', ['$window', '$timeout','$log', '$parse', function($window, $timeout, $log, $parse) {
+    /**
+     * Initializes the HTML element as a Switchery switch.
+     *
+     * $timeout is in place as a workaround to work within angular-ui tabs.
+     *
+     * @param scope
+     * @param elem
+     * @param attrs
+     * @param ngModel
+     */
+    function linkSwitchery(scope, elem, attrs, ngModel) {
+        if (!ngModel) return false;
+        var options = {};
+        try {
+            options = $parse(attrs.uiSwitch)(scope);
+        }
+        catch (e) {
+        }
+        var instanceTrueValue = true; // default ngModel if no ui-switch-true-value provided
+        var instanceFalseValue = false; // default ngModel if no ui-switch-false-value provided
+        var switcher;
 
-        /**
-         * Initializes the HTML element as a Switchery switch.
-         *
-         * $timeout is in place as a workaround to work within angular-ui tabs.
-         *
-         * @param scope
-         * @param elem
-         * @param attrs
-         * @param ngModel
-         */
-        function linkSwitchery(scope, elem, attrs, ngModel) {
-            if(!ngModel) return false;
-            var options = {};
-            try {
-                options = $parse(attrs.uiSwitch)(scope);
-            }
-            catch (e) {}
+        //set model true/false ngModels if ui-switch-true/false-ngModel provided
+        if (attrs.uiSwitchTrueValue) {
+            instanceTrueValue = isNaN(parseInt(attrs.uiSwitchTrueValue)) ? attrs.uiSwitchTrueValue : parseInt(attrs.uiSwitchTrueValue);
+        }
+        if (attrs.uiSwitchFalseValue) {
+            instanceFalseValue = isNaN(parseInt(attrs.uiSwitchFalseValue)) ? attrs.uiSwitchFalseValue : parseInt(attrs.uiSwitchFalseValue);
+        }
 
-            var switcher;
-
-            attrs.$observe('disabled', function(value) {
-              if (!switcher) {
+        attrs.$observe('disabled', function (value) {
+            if (!switcher) {
                 return;
-              }
+            }
 
-              if (value) {
+            if (value) {
                 switcher.disable();
-              }
-              else {
+            }
+            else {
                 switcher.enable();
-              }
-            });
+            }
+        });
 
-            // Watch changes
-            scope.$watch(function () {
-              return ngModel.$modelValue;
-            }, function(newValue,oldValue) {
-               initializeSwitch()
-            });
-            
-            function initializeSwitch() {
-              $timeout(function() {
+        initializeSwitch();
+
+        function initializeSwitch() {
+            $timeout(function () {
                 // Remove any old switcher
                 if (switcher) {
-                  angular.element(switcher.switcher).remove();
+                    angular.element(switcher.switcher).remove();
                 }
                 // (re)create switcher to reflect latest state of the checkbox element
                 switcher = new $window.Switchery(elem[0], options);
                 var element = switcher.element;
-                element.checked = scope.initValue;
+                element.checked = scope.ngModel == instanceTrueValue;
                 if (attrs.disabled) {
-                  switcher.disable();
+                    switcher.disable();
                 }
 
                 switcher.setPosition(false);
-                element.addEventListener('change',function(evt) {
-                    scope.$apply(function() {
-                        ngModel.$setViewValue(element.checked);
+                element.addEventListener('change', function (evt) {
+                    scope.$apply(function () {
+                        scope.ngModel = element.checked ? instanceTrueValue : instanceFalseValue; // overwrites ngModel ngModel
                     })
                 });
-                scope.$watch('initValue', function(newValue, oldValue) {
+                scope.$watch('ngModel', function (newngModel, oldngModel) {
                     switcher.setPosition(false);
                 });
-              }, 0);
-            }
-            initializeSwitch();
-          }
-
-        return {
-            require: 'ngModel',
-            restrict: 'AE',
-            scope : {
-              initValue : '=ngModel'
-            },
-            link: linkSwitchery
+            }, 0);
         }
-    }]);
+    }
+
+    return {
+        require: 'ngModel',
+        restrict: 'AE',
+        scope: {
+            ngModel: '=ngModel'
+        },
+        link: linkSwitchery
+    }
+}]);

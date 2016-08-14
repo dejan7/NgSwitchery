@@ -33,6 +33,12 @@ Disable switch
 <input type="checkbox" class="js-switch" ui-switch ng-disabled="isDisabled" />
 ```
 
+##Changing model values##
+By default, values passed to your ng-model will be `true` and `false`.
+If you want to change this behavior you can add `ui-switch-true-value` and `ui-switch-false-value` attributes to your input element.
+```html
+<input type="checkbox" class="js-switch" ng-model="myModel" ui-switch ui-switch-true-value="1" ui-switch-false-value="0" />
+```
 
 Bower install
 ```

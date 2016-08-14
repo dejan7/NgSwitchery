@@ -19,11 +19,11 @@ angular.module('Postblazer')
         }
         catch (e) {
         }
-        var instanceTrueValue = true; // default ngModel if no ui-switch-true-value provided
-        var instanceFalseValue = false; // default ngModel if no ui-switch-false-value provided
+        var instanceTrueValue = true; // default value if no ui-switch-true-value provided
+        var instanceFalseValue = false; // default value if no ui-switch-false-value provided
         var switcher;
 
-        //set model true/false ngModels if ui-switch-true/false-ngModel provided
+        //set model true/false value if ui-switch-true/false-value provided
         if (attrs.uiSwitchTrueValue) {
             instanceTrueValue = isNaN(parseInt(attrs.uiSwitchTrueValue)) ? attrs.uiSwitchTrueValue : parseInt(attrs.uiSwitchTrueValue);
         }
